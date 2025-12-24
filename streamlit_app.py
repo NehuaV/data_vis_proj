@@ -6,10 +6,18 @@ from matplotlib.colors import TwoSlopeNorm
 from matplotlib.patches import Patch
 from matplotlib import patheffects
 import os
+import urllib.request
+import zipfile
+import shutil
+from pathlib import Path
 
 # Ensure datasets directories exist
 os.makedirs("datasets", exist_ok=True)
 os.makedirs("datasets/GemDataEXTR", exist_ok=True)
+
+# Data source URLs
+GEMDATA_URL = "https://datacatalogfiles.worldbank.org/ddh-published/0037798/DR0092042/GemDataEXTR.zip"
+MAP_DATA_URL = "https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_admin_0_countries.zip"
 
 # Page configuration
 st.set_page_config(
@@ -24,6 +32,38 @@ st.markdown(
 st.markdown("<br>", unsafe_allow_html=True)  # Add some spacing
 
 
+# Helper function to download and extract zip files
+def download_and_extract_zip(url: str, extract_to: str, zip_filename: str = None):
+    """Download a zip file from URL and extract it to the specified directory"""
+    os.makedirs(extract_to, exist_ok=True)
+    
+    if zip_filename is None:
+        zip_filename = os.path.join(extract_to, os.path.basename(url))
+    else:
+        zip_filename = os.path.join(extract_to, zip_filename)
+    
+    # Download the file
+    try:
+        urllib.request.urlretrieve(url, zip_filename)
+    except Exception as e:
+        st.error(f"Failed to download {url}: {str(e)}")
+        st.stop()
+    
+    # Extract the zip file
+    try:
+        with zipfile.ZipFile(zip_filename, 'r') as zip_ref:
+            zip_ref.extractall(extract_to)
+    except Exception as e:
+        st.error(f"Failed to extract {zip_filename}: {str(e)}")
+        st.stop()
+    
+    # Clean up the zip file after extraction
+    try:
+        os.remove(zip_filename)
+    except Exception:
+        pass  # Ignore errors when removing zip file
+
+
 # Cache data loading functions for better performance
 @st.cache_data
 def load_unemployment_data():
@@ -31,8 +71,58 @@ def load_unemployment_data():
     # Ensure directory exists
     os.makedirs("datasets/GemDataEXTR", exist_ok=True)
 
-    filename = "datasets/GemDataEXTR/Unemployment Rate, seas. adj..xlsx"
-    df = pd.read_excel(filename, header=0)
+    # Try XLSX first, then CSV as fallback
+    xlsx_filename = "datasets/GemDataEXTR/Unemployment Rate, seas. adj..xlsx"
+    csv_filename = "datasets/GemDataEXTR/Unemployment Rate, seas. adj..csv"
+    
+    # If files don't exist, download and extract the zip
+    if not os.path.exists(xlsx_filename) and not os.path.exists(csv_filename):
+        gemdata_zip = "datasets/GemDataEXTR.zip"
+        if not os.path.exists(gemdata_zip):
+            with st.spinner("Downloading unemployment data from World Bank..."):
+                download_and_extract_zip(GEMDATA_URL, "datasets", "GemDataEXTR.zip")
+        else:
+            # Extract if zip exists but files don't
+            with st.spinner("Extracting unemployment data..."):
+                with zipfile.ZipFile(gemdata_zip, 'r') as zip_ref:
+                    zip_ref.extractall("datasets")
+                # Clean up zip after extraction
+                try:
+                    os.remove(gemdata_zip)
+                except Exception:
+                    pass
+        
+        # Handle nested folder structure (zip might extract to datasets/GemDataEXTR/GemDataEXTR/)
+        extracted_folder = os.path.join("datasets", "GemDataEXTR", "GemDataEXTR")
+        target_folder = os.path.join("datasets", "GemDataEXTR")
+        if os.path.exists(extracted_folder):
+            # Move all files from nested folder to target folder
+            for item in os.listdir(extracted_folder):
+                src = os.path.join(extracted_folder, item)
+                dst = os.path.join(target_folder, item)
+                if os.path.exists(dst):
+                    # Remove existing file/folder if it exists
+                    if os.path.isdir(dst):
+                        shutil.rmtree(dst)
+                    else:
+                        os.remove(dst)
+                shutil.move(src, dst)
+            # Remove the now empty nested folder
+            try:
+                os.rmdir(extracted_folder)
+            except Exception:
+                pass
+    
+    if os.path.exists(xlsx_filename):
+        df = pd.read_excel(xlsx_filename, header=0)
+    elif os.path.exists(csv_filename):
+        df = pd.read_csv(csv_filename, header=0)
+    else:
+        st.error(
+            f"❌ **Data file not found after download!**\n\n"
+            f"Please check the download URL: {GEMDATA_URL}"
+        )
+        st.stop()
 
     # Rename the first column to 'Year'
     df.rename(columns={"Unnamed: 0": "Year"}, inplace=True)
@@ -63,8 +153,9 @@ def load_map_data():
 
     map_file = "datasets/ne_10m_admin_0_countries.zip"
     if not os.path.exists(map_file):
-        st.error(f"Map file not found: {map_file}")
-        st.stop()
+        # Download the map file if it doesn't exist
+        with st.spinner("Downloading map data from Natural Earth..."):
+            download_and_extract_zip(MAP_DATA_URL, "datasets", "ne_10m_admin_0_countries.zip")
 
     world = gpd.read_file(map_file)
 
