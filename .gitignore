@@ -1,0 +1,18 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+tmp
+.vscode
+
+16FinDataAnalytics_Map_solution.ipynb
+out/
+datasets/
+.DS_Store
