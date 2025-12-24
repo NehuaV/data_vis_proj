@@ -17,13 +17,11 @@ BASE_DIR = SCRIPT_DIR
 
 # Ensure datasets directories exist
 datasets_dir = BASE_DIR / "datasets"
-gemdata_dir = datasets_dir / "GemDataEXTR"
 os.makedirs(datasets_dir, exist_ok=True)
-os.makedirs(gemdata_dir, exist_ok=True)
 
 # Data source URLs
 GEMDATA_URL = "https://datacatalogfiles.worldbank.org/ddh-published/0037798/DR0092042/GemDataEXTR.zip"
-MAP_DATA_URL = "https://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_admin_0_countries.zip"
+MAP_DATA_URL = "https://naciscdn.org/naturalearth/10m/cultural/ne_10m_admin_0_countries.zip"
 
 # Page configuration
 st.set_page_config(
@@ -76,12 +74,16 @@ def download_and_extract_zip(url: str, extract_to: Path, zip_filename: str = Non
 def load_unemployment_data():
     """Load and clean unemployment rate data"""
     # Use absolute paths relative to script location
-    xlsx_path = gemdata_dir / "Unemployment Rate, seas. adj..xlsx"
-    csv_path = gemdata_dir / "Unemployment Rate, seas. adj..csv"
+    # Check both in datasets/ and datasets/GemDataEXTR/
+    xlsx_path = datasets_dir / "Unemployment Rate, seas. adj..xlsx"
+    xlsx_path_subdir = datasets_dir / "GemDataEXTR" / "Unemployment Rate, seas. adj..xlsx"
     gemdata_zip_path = datasets_dir / "GemDataEXTR.zip"
     
-    # If files don't exist, download and extract the zip
-    if not xlsx_path.exists() and not csv_path.exists():
+    # Determine which path has the file
+    if xlsx_path_subdir.exists():
+        xlsx_path = xlsx_path_subdir
+    elif not xlsx_path.exists():
+        # If files don't exist, download and extract the zip
         if not gemdata_zip_path.exists():
             with st.spinner("Downloading unemployment data from World Bank..."):
                 download_and_extract_zip(GEMDATA_URL, datasets_dir, "GemDataEXTR.zip")
@@ -96,41 +98,28 @@ def load_unemployment_data():
                 except Exception:
                     pass
         
-        # Handle nested folder structure (zip might extract to datasets/GemDataEXTR/GemDataEXTR/)
-        extracted_folder = gemdata_dir / "GemDataEXTR"
-        if extracted_folder.exists():
-            # Move all files from nested folder to target folder
-            for item in extracted_folder.iterdir():
-                dst = gemdata_dir / item.name
-                if dst.exists():
-                    # Remove existing file/folder if it exists
-                    if dst.is_dir():
-                        shutil.rmtree(dst)
-                    else:
-                        dst.unlink()
-                shutil.move(str(item), str(dst))
-            # Remove the now empty nested folder
-            try:
-                extracted_folder.rmdir()
-            except Exception:
-                pass
+        # Check if files are in GemDataEXTR subdirectory
+        gemdata_subdir = datasets_dir / "GemDataEXTR"
+        if gemdata_subdir.exists() and (gemdata_subdir / "Unemployment Rate, seas. adj..xlsx").exists():
+            xlsx_path = gemdata_subdir / "Unemployment Rate, seas. adj..xlsx"
+        elif xlsx_path_subdir.exists():
+            xlsx_path = xlsx_path_subdir
+        elif not xlsx_path.exists():
+            # List available files for debugging
+            available_files = list(datasets_dir.glob("*"))
+            if gemdata_subdir.exists():
+                available_files.extend(list(gemdata_subdir.glob("*")))
+            file_list = "\n".join([f"- {f.name}" for f in available_files[:20]])
+            st.error(
+                f"❌ **Data file not found after download!**\n\n"
+                f"Looking for: `Unemployment Rate, seas. adj..xlsx`\n\n"
+                f"Available files:\n{file_list}\n\n"
+                f"Please check the download URL: {GEMDATA_URL}"
+            )
+            st.stop()
     
-    # Try XLSX first, then CSV as fallback
-    if xlsx_path.exists():
-        df = pd.read_excel(xlsx_path, header=0)
-    elif csv_path.exists():
-        df = pd.read_csv(csv_path, header=0)
-    else:
-        # List available files for debugging
-        available_files = list(gemdata_dir.glob("*"))
-        file_list = "\n".join([f"- {f.name}" for f in available_files[:10]])
-        st.error(
-            f"❌ **Data file not found after download!**\n\n"
-            f"Looking for: `{xlsx_path.name}` or `{csv_path.name}`\n\n"
-            f"Available files in {gemdata_dir}:\n{file_list}\n\n"
-            f"Please check the download URL: {GEMDATA_URL}"
-        )
-        st.stop()
+    # Read the file
+    df = pd.read_excel(xlsx_path, header=0)
 
     # Rename the first column to 'Year'
     df.rename(columns={"Unnamed: 0": "Year"}, inplace=True)
@@ -158,11 +147,18 @@ def load_map_data():
     """Load Natural Earth map data"""
     map_file = datasets_dir / "ne_10m_admin_0_countries.zip"
     if not map_file.exists():
-        # Download the map file if it doesn't exist
+        # Download the map file if it doesn't exist (without extracting)
         with st.spinner("Downloading map data from Natural Earth..."):
-            download_and_extract_zip(MAP_DATA_URL, datasets_dir, "ne_10m_admin_0_countries.zip")
+            try:
+                urllib.request.urlretrieve(MAP_DATA_URL, str(map_file))
+            except Exception as e:
+                st.error(f"Failed to download map data: {str(e)}")
+                st.stop()
 
-    world = gpd.read_file(str(map_file))
+    # Read directly from zip file using /vsizip/ path
+    # Geopandas can read shapefiles from zip files directly
+    zip_path_str = f"/vsizip/{map_file}"
+    world = gpd.read_file(zip_path_str)
 
     # Filter for Europe only (excluding Turkey)
     europe_map = world[
@@ -321,6 +317,16 @@ for country_name in merged_with_data["SOVEREIGNT"].unique():
         # Coordinates: approximately 2.2°E, 46.6°N (center of France)
         label_x = max(x_min, min(x_max, 2.2))
         label_y = max(y_min, min(y_max, 46.6))
+    elif country_name == "United Kingdom":
+        # United Kingdom: use hard-coded geographical center of United Kingdom (mainland)
+        # Coordinates: approximately -2.2°W, 51.6°N (center of United Kingdom)
+        label_x = max(x_min, min(x_max, -2.2))
+        label_y = max(y_min, min(y_max, 51.6))
+    elif country_name == "Norway":
+        # Norway: use hard-coded geographical center of Norway (mainland)
+        # Coordinates: approximately 10.0°E, 62.0°N (center of Norway)
+        label_x = max(x_min, min(x_max, 10.0))
+        label_y = max(y_min, min(y_max, 62.0))
     else:
         # All other countries: calculate centroid of union of all geometries
         # This ensures we get the true geographic center for multi-part countries
