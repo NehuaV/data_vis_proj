@@ -73,10 +73,9 @@ def load_unemployment_data():
 
     # Try XLSX first, then CSV as fallback
     xlsx_filename = "datasets/GemDataEXTR/Unemployment Rate, seas. adj..xlsx"
-    csv_filename = "datasets/GemDataEXTR/Unemployment Rate, seas. adj..csv"
     
     # If files don't exist, download and extract the zip
-    if not os.path.exists(xlsx_filename) and not os.path.exists(csv_filename):
+    if not os.path.exists(xlsx_filename):
         gemdata_zip = "datasets/GemDataEXTR.zip"
         if not os.path.exists(gemdata_zip):
             with st.spinner("Downloading unemployment data from World Bank..."):
@@ -115,8 +114,6 @@ def load_unemployment_data():
     
     if os.path.exists(xlsx_filename):
         df = pd.read_excel(xlsx_filename, header=0)
-    elif os.path.exists(csv_filename):
-        df = pd.read_csv(csv_filename, header=0)
     else:
         st.error(
             f"❌ **Data file not found after download!**\n\n"
