@@ -11,9 +11,15 @@ import zipfile
 import shutil
 from pathlib import Path
 
+# Get the directory where this script is located
+SCRIPT_DIR = Path(__file__).parent.absolute()
+BASE_DIR = SCRIPT_DIR
+
 # Ensure datasets directories exist
-os.makedirs("datasets", exist_ok=True)
-os.makedirs("datasets/GemDataEXTR", exist_ok=True)
+datasets_dir = BASE_DIR / "datasets"
+gemdata_dir = datasets_dir / "GemDataEXTR"
+os.makedirs(datasets_dir, exist_ok=True)
+os.makedirs(gemdata_dir, exist_ok=True)
 
 # Data source URLs
 GEMDATA_URL = "https://datacatalogfiles.worldbank.org/ddh-published/0037798/DR0092042/GemDataEXTR.zip"
@@ -33,33 +39,34 @@ st.markdown("<br>", unsafe_allow_html=True)  # Add some spacing
 
 
 # Helper function to download and extract zip files
-def download_and_extract_zip(url: str, extract_to: str, zip_filename: str = None):
+def download_and_extract_zip(url: str, extract_to: Path, zip_filename: str = None):
     """Download a zip file from URL and extract it to the specified directory"""
+    extract_to = Path(extract_to)
     os.makedirs(extract_to, exist_ok=True)
     
     if zip_filename is None:
-        zip_filename = os.path.join(extract_to, os.path.basename(url))
+        zip_path = extract_to / os.path.basename(url)
     else:
-        zip_filename = os.path.join(extract_to, zip_filename)
+        zip_path = extract_to / zip_filename
     
     # Download the file
     try:
-        urllib.request.urlretrieve(url, zip_filename)
+        urllib.request.urlretrieve(url, str(zip_path))
     except Exception as e:
         st.error(f"Failed to download {url}: {str(e)}")
         st.stop()
     
     # Extract the zip file
     try:
-        with zipfile.ZipFile(zip_filename, 'r') as zip_ref:
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(extract_to)
     except Exception as e:
-        st.error(f"Failed to extract {zip_filename}: {str(e)}")
+        st.error(f"Failed to extract {zip_path}: {str(e)}")
         st.stop()
     
     # Clean up the zip file after extraction
     try:
-        os.remove(zip_filename)
+        zip_path.unlink()
     except Exception:
         pass  # Ignore errors when removing zip file
 
@@ -68,55 +75,59 @@ def download_and_extract_zip(url: str, extract_to: str, zip_filename: str = None
 @st.cache_data
 def load_unemployment_data():
     """Load and clean unemployment rate data"""
-    # Ensure directory exists
-    os.makedirs("datasets/GemDataEXTR", exist_ok=True)
-
-    # Try XLSX first, then CSV as fallback
-    xlsx_filename = "datasets/GemDataEXTR/Unemployment Rate, seas. adj..xlsx"
+    # Use absolute paths relative to script location
+    xlsx_path = gemdata_dir / "Unemployment Rate, seas. adj..xlsx"
+    csv_path = gemdata_dir / "Unemployment Rate, seas. adj..csv"
+    gemdata_zip_path = datasets_dir / "GemDataEXTR.zip"
     
     # If files don't exist, download and extract the zip
-    if not os.path.exists(xlsx_filename):
-        gemdata_zip = "datasets/GemDataEXTR.zip"
-        if not os.path.exists(gemdata_zip):
+    if not xlsx_path.exists() and not csv_path.exists():
+        if not gemdata_zip_path.exists():
             with st.spinner("Downloading unemployment data from World Bank..."):
-                download_and_extract_zip(GEMDATA_URL, "datasets", "GemDataEXTR.zip")
+                download_and_extract_zip(GEMDATA_URL, datasets_dir, "GemDataEXTR.zip")
         else:
             # Extract if zip exists but files don't
             with st.spinner("Extracting unemployment data..."):
-                with zipfile.ZipFile(gemdata_zip, 'r') as zip_ref:
-                    zip_ref.extractall("datasets")
+                with zipfile.ZipFile(gemdata_zip_path, 'r') as zip_ref:
+                    zip_ref.extractall(datasets_dir)
                 # Clean up zip after extraction
                 try:
-                    os.remove(gemdata_zip)
+                    gemdata_zip_path.unlink()
                 except Exception:
                     pass
         
         # Handle nested folder structure (zip might extract to datasets/GemDataEXTR/GemDataEXTR/)
-        extracted_folder = os.path.join("datasets", "GemDataEXTR", "GemDataEXTR")
-        target_folder = os.path.join("datasets", "GemDataEXTR")
-        if os.path.exists(extracted_folder):
+        extracted_folder = gemdata_dir / "GemDataEXTR"
+        if extracted_folder.exists():
             # Move all files from nested folder to target folder
-            for item in os.listdir(extracted_folder):
-                src = os.path.join(extracted_folder, item)
-                dst = os.path.join(target_folder, item)
-                if os.path.exists(dst):
+            for item in extracted_folder.iterdir():
+                dst = gemdata_dir / item.name
+                if dst.exists():
                     # Remove existing file/folder if it exists
-                    if os.path.isdir(dst):
+                    if dst.is_dir():
                         shutil.rmtree(dst)
                     else:
-                        os.remove(dst)
-                shutil.move(src, dst)
+                        dst.unlink()
+                shutil.move(str(item), str(dst))
             # Remove the now empty nested folder
             try:
-                os.rmdir(extracted_folder)
+                extracted_folder.rmdir()
             except Exception:
                 pass
     
-    if os.path.exists(xlsx_filename):
-        df = pd.read_excel(xlsx_filename, header=0)
+    # Try XLSX first, then CSV as fallback
+    if xlsx_path.exists():
+        df = pd.read_excel(xlsx_path, header=0)
+    elif csv_path.exists():
+        df = pd.read_csv(csv_path, header=0)
     else:
+        # List available files for debugging
+        available_files = list(gemdata_dir.glob("*"))
+        file_list = "\n".join([f"- {f.name}" for f in available_files[:10]])
         st.error(
             f"❌ **Data file not found after download!**\n\n"
+            f"Looking for: `{xlsx_path.name}` or `{csv_path.name}`\n\n"
+            f"Available files in {gemdata_dir}:\n{file_list}\n\n"
             f"Please check the download URL: {GEMDATA_URL}"
         )
         st.stop()
@@ -145,16 +156,13 @@ def load_unemployment_data():
 @st.cache_data
 def load_map_data():
     """Load Natural Earth map data"""
-    # Ensure directory exists
-    os.makedirs("datasets", exist_ok=True)
-
-    map_file = "datasets/ne_10m_admin_0_countries.zip"
-    if not os.path.exists(map_file):
+    map_file = datasets_dir / "ne_10m_admin_0_countries.zip"
+    if not map_file.exists():
         # Download the map file if it doesn't exist
         with st.spinner("Downloading map data from Natural Earth..."):
-            download_and_extract_zip(MAP_DATA_URL, "datasets", "ne_10m_admin_0_countries.zip")
+            download_and_extract_zip(MAP_DATA_URL, datasets_dir, "ne_10m_admin_0_countries.zip")
 
-    world = gpd.read_file(map_file)
+    world = gpd.read_file(str(map_file))
 
     # Filter for Europe only (excluding Turkey)
     europe_map = world[
