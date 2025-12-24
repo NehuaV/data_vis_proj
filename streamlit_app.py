@@ -426,8 +426,8 @@ st.markdown("<br>", unsafe_allow_html=True)
 
 # Footer with information (more compact)
 st.markdown("---")
-st.caption(
-    "**Data Source:** Unemployment Rate, seas. adj. (World Bank)  |  "
-    "**Map Data:** Natural Earth (ne_10m_admin_0_countries)  |  "
-    "**Colormap:** Coolwarm (diverging, centered at European average)"
+st.markdown(
+    "**Data Sources:**  \n"
+    f"[Unemployment Rate, seas. adj. (World Bank)]({GEMDATA_URL})  \n"
+    f"[Natural Earth Map Data (ne_10m_admin_0_countries)]({MAP_DATA_URL})  \n"
 )
