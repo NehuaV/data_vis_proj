@@ -16,3 +16,6 @@ tmp
 out/
 datasets/
 .DS_Store
+
+# Lock files (use requirements.txt for deployment)
+uv.lock
