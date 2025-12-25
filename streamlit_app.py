@@ -4,7 +4,6 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
 from matplotlib import patheffects
-from matplotlib.patches import Patch
 import os
 import urllib.request
 import zipfile
@@ -23,7 +22,7 @@ MAP_DATA_URL = (
     "https://naciscdn.org/naturalearth/10m/cultural/ne_10m_admin_0_countries.zip"
 )
 
-# Fixed Bounds for Europe (Prevents map from shifting)
+# Fixed Bounds for Europe
 X_MIN, X_MAX = -25, 45
 Y_MIN, Y_MAX = 32, 72
 
@@ -95,7 +94,6 @@ def load_data():
 
     df_melted = df.melt(id_vars=["Year"], var_name="Country", value_name="Unemployment")
 
-    # Clean numeric data
     df_melted["Unemployment"] = (
         df_melted["Unemployment"]
         .astype(str)
@@ -103,7 +101,6 @@ def load_data():
         .apply(pd.to_numeric, errors="coerce")
     )
 
-    # Align Names
     name_mapping = {
         "Russian Federation": "Russia",
         "Czech Republic": "Czechia",
@@ -124,25 +121,22 @@ st.caption("Interactive visualization of unemployment rates across Europe")
 with st.spinner("Loading data..."):
     europe_map, df_melted = load_data()
 
-# --- GLOBAL STATISTICS (For Consistent Coloring) ---
-# We calculate these once based on the ENTIRE dataset, so the colors
-# mean the same thing in 2005 as they do in 2024.
-global_min = df_melted["Unemployment"].min()
-global_max = df_melted["Unemployment"].max()
-global_mean = df_melted["Unemployment"].mean()
+# --- GLOBAL STATISTICS ---
+euro_data = df_melted[df_melted["Country_Map"].isin(europe_map["SOVEREIGNT"])]
+euro_min = euro_data["Unemployment"].min()
+euro_max = euro_data["Unemployment"].max()
+euro_mean = euro_data["Unemployment"].mean()
 
-# Calculate symmetric range around global average
-max_deviation = max(abs(global_max - global_mean), abs(global_min - global_mean))
+max_deviation = max(abs(euro_max - euro_mean), abs(euro_min - euro_mean))
 norm = TwoSlopeNorm(
-    vmin=max(0, global_mean - max_deviation),
-    vcenter=global_mean,
-    vmax=global_mean + max_deviation,
+    vmin=max(0, euro_mean - max_deviation),
+    vcenter=euro_mean,
+    vmax=euro_mean + max_deviation,
 )
 
-# --- LAYOUT COLUMNS ---
+# --- LAYOUT ---
 col_left, col_right = st.columns([4, 6], gap="large")
 
-# --- LEFT COLUMN: CONTROLS & STATS ---
 with col_left:
     st.markdown("### Settings")
 
@@ -154,22 +148,16 @@ with col_left:
         value=2024 if 2024 in available_years else available_years[-1],
     )
 
-    # Filter Data for selected year
     df_year = df_melted[df_melted["Year"] == selected_year].copy()
-
-    # Merge
     merged = europe_map.merge(
         df_year, left_on="SOVEREIGNT", right_on="Country_Map", how="left"
     )
 
-    # Calculate Year Stats
     year_data = merged["Unemployment"].dropna()
 
     if len(year_data) > 0:
         st.markdown("---")
         st.markdown(f"### Statistics for {selected_year}")
-
-        # Display metrics in a grid
         m1, m2 = st.columns(2)
         m1.metric("Avg Rate", f"{year_data.mean():.2f}%")
         m2.metric("Max Rate", f"{year_data.max():.2f}%")
@@ -178,7 +166,6 @@ with col_left:
         m3.metric("Min Rate", f"{year_data.min():.2f}%")
         m4.metric("Countries", f"{len(year_data)}")
 
-        # Show highest unemployment country
         max_country = merged.loc[merged["Unemployment"].idxmax()]
         st.info(
             f"🚨 Highest: **{max_country['SOVEREIGNT']}** ({max_country['Unemployment']:.1f}%)"
@@ -186,30 +173,27 @@ with col_left:
     else:
         st.warning(f"No data available for {selected_year}")
 
-# --- RIGHT COLUMN: MAP ---
 with col_right:
-    # Set up fixed figure
+    # 10x10 Figure
     fig = plt.figure(figsize=(10, 10))
 
-    # ADD AXES MANUALLY: [left, bottom, width, height]
-    # This locks the map area in pixels, preventing "jitter" when year changes
+    # Axes placement
     ax = fig.add_axes([0.05, 0.2, 0.9, 0.75])
 
-    # Force axes limits to remain constant
     ax.set_xlim(X_MIN, X_MAX)
     ax.set_ylim(Y_MIN, Y_MAX)
+
+    # FIX: Map is stretched horizontally because of madeira and norway islands.
     ax.set_aspect("equal")
+
     ax.set_axis_off()
 
-    # Split data
     data_exists = merged[merged["Unemployment"].notna()]
     no_data = merged[merged["Unemployment"].isna()]
 
-    # 1. Plot "No Data" countries (Base layer)
     if not no_data.empty:
         no_data.plot(ax=ax, color="#f0f0f0", edgecolor="#d0d0d0", hatch="////")
 
-    # 2. Plot Data countries
     if not data_exists.empty:
         data_exists.plot(
             column="Unemployment",
@@ -220,16 +204,11 @@ with col_right:
             linewidth=0.5,
         )
 
-        # 3. Add Labels
-        # We process labels manually to ensure they land in the right spot
         for _, row in data_exists.iterrows():
             if pd.isna(row["Unemployment"]):
                 continue
 
-            # Simple centroid logic with overrides for weird shapes
             country = row["SOVEREIGNT"]
-
-            # Coordinates override for difficult countries
             coords = None
             if country == "Russia":
                 coords = (37.6, 55.8)
@@ -240,13 +219,9 @@ with col_right:
             elif country == "United Kingdom":
                 coords = (-2.0, 52.5)
             else:
-                # Default centroid check
-                try:
-                    cent = row.geometry.centroid
-                    if X_MIN <= cent.x <= X_MAX and Y_MIN <= cent.y <= Y_MAX:
-                        coords = (cent.x, cent.y)
-                except:
-                    pass
+                cent = row.geometry.centroid
+                if X_MIN <= cent.x <= X_MAX and Y_MIN <= cent.y <= Y_MAX:
+                    coords = (cent.x, cent.y)
 
             if coords:
                 txt = ax.text(
@@ -267,16 +242,20 @@ with col_right:
                     ]
                 )
 
-    # 4. Manual Colorbar
-    # Fixed position relative to figure
-    cax = fig.add_axes([0.25, 0.15, 0.5, 0.02])
+    ax_pos = ax.get_position()
+    # Align colorbar below map
+    cax = fig.add_axes([ax_pos.x0, ax_pos.y0 - 0.02, ax_pos.width, 0.02])
     sm = plt.cm.ScalarMappable(cmap="coolwarm", norm=norm)
     sm._A = []
     cbar = fig.colorbar(sm, cax=cax, orientation="horizontal")
     cbar.set_label("Unemployment Rate (%)")
 
-    # Render
     st.pyplot(fig, use_container_width=True)
 
 st.markdown("---")
-st.caption(f"Data Sources: World Bank & Natural Earth")
+st.markdown(
+    """
+    Data Sources: 
+    [World Bank](https://data.worldbank.org/indicator/SL.UEM.TOTL.ZS) & [Natural Earth](https://www.naturalearthdata.com/)
+    """
+)
