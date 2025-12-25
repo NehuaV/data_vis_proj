@@ -8,7 +8,6 @@ from matplotlib import patheffects
 import os
 import urllib.request
 import zipfile
-import shutil
 from pathlib import Path
 
 # Get the directory where this script is located
@@ -21,7 +20,9 @@ os.makedirs(datasets_dir, exist_ok=True)
 
 # Data source URLs
 GEMDATA_URL = "https://datacatalogfiles.worldbank.org/ddh-published/0037798/DR0092042/GemDataEXTR.zip"
-MAP_DATA_URL = "https://naciscdn.org/naturalearth/10m/cultural/ne_10m_admin_0_countries.zip"
+MAP_DATA_URL = (
+    "https://naciscdn.org/naturalearth/10m/cultural/ne_10m_admin_0_countries.zip"
+)
 
 # Page configuration
 st.set_page_config(
@@ -30,10 +31,9 @@ st.set_page_config(
 
 # Title
 st.title("🗺️ European Unemployment Rate Visualization")
-st.markdown(
+st.caption(
     "Interactive visualization of unemployment rates across Europe over the years"
 )
-st.markdown("<br>", unsafe_allow_html=True)  # Add some spacing
 
 
 # Helper function to download and extract zip files
@@ -41,27 +41,27 @@ def download_and_extract_zip(url: str, extract_to: Path, zip_filename: str = Non
     """Download a zip file from URL and extract it to the specified directory"""
     extract_to = Path(extract_to)
     os.makedirs(extract_to, exist_ok=True)
-    
+
     if zip_filename is None:
         zip_path = extract_to / os.path.basename(url)
     else:
         zip_path = extract_to / zip_filename
-    
+
     # Download the file
     try:
         urllib.request.urlretrieve(url, str(zip_path))
     except Exception as e:
         st.error(f"Failed to download {url}: {str(e)}")
         st.stop()
-    
+
     # Extract the zip file
     try:
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        with zipfile.ZipFile(zip_path, "r") as zip_ref:
             zip_ref.extractall(extract_to)
     except Exception as e:
         st.error(f"Failed to extract {zip_path}: {str(e)}")
         st.stop()
-    
+
     # Clean up the zip file after extraction
     try:
         zip_path.unlink()
@@ -76,9 +76,11 @@ def load_unemployment_data():
     # Use absolute paths relative to script location
     # Check both in datasets/ and datasets/GemDataEXTR/
     xlsx_path = datasets_dir / "Unemployment Rate, seas. adj..xlsx"
-    xlsx_path_subdir = datasets_dir / "GemDataEXTR" / "Unemployment Rate, seas. adj..xlsx"
+    xlsx_path_subdir = (
+        datasets_dir / "GemDataEXTR" / "Unemployment Rate, seas. adj..xlsx"
+    )
     gemdata_zip_path = datasets_dir / "GemDataEXTR.zip"
-    
+
     # Determine which path has the file
     if xlsx_path_subdir.exists():
         xlsx_path = xlsx_path_subdir
@@ -90,17 +92,20 @@ def load_unemployment_data():
         else:
             # Extract if zip exists but files don't
             with st.spinner("Extracting unemployment data..."):
-                with zipfile.ZipFile(gemdata_zip_path, 'r') as zip_ref:
+                with zipfile.ZipFile(gemdata_zip_path, "r") as zip_ref:
                     zip_ref.extractall(datasets_dir)
                 # Clean up zip after extraction
                 try:
                     gemdata_zip_path.unlink()
                 except Exception:
                     pass
-        
+
         # Check if files are in GemDataEXTR subdirectory
         gemdata_subdir = datasets_dir / "GemDataEXTR"
-        if gemdata_subdir.exists() and (gemdata_subdir / "Unemployment Rate, seas. adj..xlsx").exists():
+        if (
+            gemdata_subdir.exists()
+            and (gemdata_subdir / "Unemployment Rate, seas. adj..xlsx").exists()
+        ):
             xlsx_path = gemdata_subdir / "Unemployment Rate, seas. adj..xlsx"
         elif xlsx_path_subdir.exists():
             xlsx_path = xlsx_path_subdir
@@ -117,7 +122,7 @@ def load_unemployment_data():
                 f"Please check the download URL: {GEMDATA_URL}"
             )
             st.stop()
-    
+
     # Read the file
     df = pd.read_excel(xlsx_path, header=0)
 
@@ -178,15 +183,18 @@ available_years = sorted(df_melted["Year"].unique())
 min_year = available_years[0]
 max_year = available_years[-1]
 
-# Sidebar for year selection
-st.sidebar.header("Settings")
-selected_year = st.sidebar.slider(
-    "Select Year",
-    min_value=min_year,
-    max_value=max_year,
-    value=2024 if 2024 in available_years else max_year,
-    step=1,
-)
+# Create layout early for slider placement
+col_left, col_center = st.columns([5, 5])
+
+# Year selection slider in left column
+with col_left:
+    selected_year = st.slider(
+        "Select Year",
+        min_value=min_year,
+        max_value=max_year,
+        value=2024 if 2024 in available_years else max_year,
+        step=1,
+    )
 
 # Filter data for selected year
 df_target = df_melted[df_melted["Year"] == selected_year].copy()
@@ -225,37 +233,23 @@ max_deviation = max(abs(europe_max - europe_avg), abs(europe_min - europe_avg))
 vmin = max(0, europe_avg - max_deviation)
 vmax = europe_avg + max_deviation
 
-# Display statistics
-col1, col2, col3, col4 = st.columns(4)
-with col1:
-    st.metric("European Average", f"{europe_avg:.2f}%")
-with col2:
-    st.metric("Minimum", f"{europe_min:.2f}%")
-with col3:
-    st.metric("Maximum", f"{europe_max:.2f}%")
-with col4:
-    st.metric("Countries with Data", len(europe_data))
-
-# Add small margin before map
-st.markdown("<br>", unsafe_allow_html=True)
+# Statistics will be displayed in left column with the map
 
 # Define fixed geographic bounds for Europe (consistent across all years)
 x_min, x_max = -25, 45
 y_min, y_max = 32, 72
 
-# Calculate geographic aspect ratio
-geo_width = x_max - x_min  # 70 degrees longitude
-geo_height = y_max - y_min  # 40 degrees latitude
-geo_aspect = geo_width / geo_height  # 1.75
 
-# Create the plot with smaller fixed size to fit on screen
-# Reduced dimensions to fit better on screen without scrolling
-fig_width = 12
-fig_height = 7  # Reduced height to fit on screen
+# Create the plot with smaller size to prevent it from getting too big
+fig_width = 8
+fig_height = 8  # Smaller height
 
-# Use constrained_layout with tighter padding for more compact display
-fig, ax = plt.subplots(1, 1, figsize=(fig_width, fig_height), constrained_layout=True)
-fig.set_constrained_layout_pads(w_pad=0.02, h_pad=0.02)
+# Use constrained_layout with minimal padding for compact display
+# Set DPI to ensure consistent static size
+fig, ax = plt.subplots(
+    1, 1, figsize=(fig_width, fig_height), dpi=100, constrained_layout=True
+)
+fig.set_constrained_layout_pads(w_pad=0.01, h_pad=0.01)
 
 # Set fixed axis limits BEFORE plotting to ensure consistent map size
 ax.set_xlim(x_min, x_max)
@@ -273,19 +267,11 @@ merged_with_data = merged[merged["Unemployment"].notna()].copy()
 merged_no_data = merged[merged["Unemployment"].isna()].copy()
 
 # Plot countries with data first
-# Use consistent legend positioning to prevent layout shifts
+# Don't create legend automatically - we'll create it manually to match axes width
 merged_with_data.plot(
     column="Unemployment",
     ax=ax,
-    legend=True,
-    legend_kwds={
-        "label": f"Unemployment Rate (%) in {selected_year} (Europe Avg: {europe_avg:.2f}%)",
-        "orientation": "horizontal",
-        "shrink": 0.8,
-        "pad": 0.02,  # Slightly more padding for consistency
-        "aspect": 20,
-        "location": "bottom",  # Fixed location
-    },
+    legend=False,  # We'll create colorbar manually
     cmap="coolwarm",
     norm=norm,
     edgecolor="black",
@@ -402,12 +388,6 @@ if len(merged_no_data) > 0:
         labels.append("No Data")
         ax.legend(handles=handles, labels=labels, loc="upper left")
 
-# Ensure axis limits remain fixed (in case plotting changed them)
-ax.set_xlim(x_min, x_max)
-ax.set_ylim(y_min, y_max)
-
-# Ensure aspect ratio is maintained (critical for consistent sizing)
-ax.set_aspect("equal")
 
 ax.set_axis_off()
 
@@ -415,19 +395,46 @@ ax.set_axis_off()
 # This must be done after all plotting to override any automatic adjustments
 fig.set_size_inches(fig_width, fig_height)
 
-# Add container with centered map and margins
-col_left, col_center, col_right = st.columns([1, 10, 1])
+# Create colorbar manually to match axes width exactly
+# Get the axes position after layout is finalized
+ax_pos = ax.get_position()
+# Create a colorbar axes that matches the main axes width with minimal padding
+cax = fig.add_axes(
+    [
+        ax_pos.x0,  # Same x position as main axes
+        ax_pos.y0 - 0.03,  # Below the main axes with minimal padding
+        ax_pos.width,  # Same width as main axes
+        0.015,  # Compact height for colorbar
+    ]
+)
+# Use the first collection from the plot (the countries with data) for the colorbar
+# This avoids needing ScalarMappable import and works directly with the plotted data
+plot_collection = ax.collections[0] if ax.collections else None
+cbar = fig.colorbar(plot_collection, cax=cax, orientation="horizontal")
+
+# Ensure figure size is fixed after colorbar creation to prevent height changes
+# constrained_layout is already active, so we just need to fix the size
+fig.set_size_inches(fig_width, fig_height)
+fig.set_dpi(100)
+
+# Add metrics to left column (below slider) and plot to right column
+with col_left:
+    # Display statistics vertically aligned with compact spacing
+    st.metric("European Average", f"{europe_avg:.2f}%")
+    st.metric("Minimum", f"{europe_min:.2f}%")
+    st.metric("Maximum", f"{europe_max:.2f}%")
+    st.metric("Countries with Data", len(europe_data))
+
 with col_center:
-    # Display the plot with use_container_width to fill available space
-    st.pyplot(fig, use_container_width=True, clear_figure=False)
+    # Ensure figure size is fixed before displaying to prevent height changes
+    fig.set_size_inches(fig_width, fig_height)
+    fig.set_dpi(100)
+    # Display the plot with fixed dimensions (won't resize)
+    st.pyplot(fig, use_container_width=False, clear_figure=False)
 
-# Add small margin after map
-st.markdown("<br>", unsafe_allow_html=True)
-
-# Footer with information (more compact)
+# Compact footer
 st.markdown("---")
-st.markdown(
-    "**Data Sources:**  \n"
-    f"[Unemployment Rate, seas. adj. (World Bank)]({GEMDATA_URL})  \n"
-    f"[Natural Earth Map Data (ne_10m_admin_0_countries)]({MAP_DATA_URL})  \n"
+st.caption(
+    f"**Data Sources:** [Unemployment Rate (World Bank)]({GEMDATA_URL}) | "
+    f"[Natural Earth Map Data]({MAP_DATA_URL})"
 )
