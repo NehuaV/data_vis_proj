@@ -20,3 +20,15 @@ datasets1/
 
 # Lock files (use requirements.txt for deployment)
 uv.lock
+
+/report/*.aux
+/report/*.log
+/report/*.out
+/report/*.pdf
+/report/*.toc
+/report/*.fls
+/report/*.fdb_latexmk
+/report/*.synctex.gz
+/report/*.synctex(busy)
+/report/*.synctex.gz(busy)
+/report/*.synctex.gz(busy)

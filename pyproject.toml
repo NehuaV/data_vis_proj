@@ -15,6 +15,7 @@ dependencies = [
     "geopandas>=0.14.0",
     "matplotlib>=3.8.0",
     "openpyxl>=3.1.0",
+    "ipykernel>=7.1.0",
 ]
 
 [dependency-groups]

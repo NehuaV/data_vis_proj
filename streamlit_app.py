@@ -135,7 +135,7 @@ norm = TwoSlopeNorm(
 )
 
 # --- LAYOUT ---
-col_left, col_right = st.columns([4, 6], gap="large")
+col_left, col_right = st.columns([5, 5], gap="large")
 
 with col_left:
     st.markdown("### Settings")
@@ -180,20 +180,17 @@ with col_right:
     # Axes placement
     ax = fig.add_axes([0.05, 0.2, 0.9, 0.75])
 
-    ax.set_xlim(X_MIN, X_MAX)
-    ax.set_ylim(Y_MIN, Y_MAX)
-
-    # FIX: Map is stretched horizontally because of madeira and norway islands.
-    ax.set_aspect("equal")
-
-    ax.set_axis_off()
-
     data_exists = merged[merged["Unemployment"].notna()]
     no_data = merged[merged["Unemployment"].isna()]
 
+    # 1. Plot Background
     if not no_data.empty:
-        no_data.plot(ax=ax, color="#f0f0f0", edgecolor="#d0d0d0", hatch="////")
+        # Pass aspect=None so Geopandas doesn't fight us yet
+        no_data.plot(
+            ax=ax, color="#f0f0f0", edgecolor="#d0d0d0", hatch="////", aspect=None
+        )
 
+    # 2. Plot Data
     if not data_exists.empty:
         data_exists.plot(
             column="Unemployment",
@@ -202,6 +199,7 @@ with col_right:
             norm=norm,
             edgecolor="black",
             linewidth=0.5,
+            aspect=None,  # Stop Geopandas from resetting aspect to 'equal'
         )
 
         for _, row in data_exists.iterrows():
@@ -241,6 +239,13 @@ with col_right:
                         )
                     ]
                 )
+
+    # 3. SET ASPECT RATIO & LIMITS LAST
+    # We set this AFTER plotting so Geopandas doesn't overwrite it
+    ax.set_aspect(1.5)
+    ax.set_xlim(X_MIN, X_MAX)
+    ax.set_ylim(Y_MIN, Y_MAX)
+    ax.set_axis_off()
 
     ax_pos = ax.get_position()
     # Align colorbar below map
