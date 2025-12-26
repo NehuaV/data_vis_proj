@@ -4,7 +4,6 @@
 \usepackage{geometry}
 \usepackage{graphicx}
 \usepackage{float}
-\usepackage{hyperref}
 \usepackage{xcolor}
 \usepackage{setspace}
 \usepackage{titlesec}
@@ -16,6 +15,7 @@
 \usepackage{paracol}    % Allows parallel columns that break across pages
 \usepackage{caption}    % Allows captions outside of float environments
 \usepackage{multicol}   % For text-only sections (Tasks 14/15)
+\usepackage{hyperref}   % Load hyperref last to avoid conflicts
 
 % Page geometry for landscape A4
 \geometry{
@@ -63,8 +63,7 @@
 \onehalfspacing
 
 % --- LAYOUT CONFIGURATION ---
-% Set the column ratio for paracol (0.5 means 50/50 split)
-\columnratio{0.5} 
+% Column separation for paracol
 \setlength{\columnsep}{2em}
 
 % Custom commands
@@ -95,6 +94,7 @@
 % --- TASK 1 ---
 \tasktitle{1: Bad and/or Manipulative Visualization Critique}
 
+\columnratio{0.5}
 \begin{paracol}{2}
     % LEFT COLUMN: Image
     \centering
@@ -111,8 +111,6 @@
 
     Furthermore, the legend introduces a confusing inconsistency by only showing the breakdown for ``With thinking'' and ``Without thinking'' modes on the newest model. Because the older models are shown as solid bars, a normal viewer cannot make a fair comparison because it is unclear which mode they are in. This confusion is made worse by the strange ordering of the models. By putting the newest model first rather than following a logical chronological timeline from oldest to newest, the graph feels like it is designed to grab attention rather than provide a clear, honest record of AI improvement.
     
-    \vspace{1em}
-    \textbf{Source:} OpenAI GPT-5 Reveal Livestream (\url{https://www.youtube.com/live/0Uu_VJeVVfo}).
     
 
 \end{paracol}
@@ -120,6 +118,7 @@
 % --- TASK 2 ---
 \tasktitle{2: Improved Version of Bad Visualization}
 
+\columnratio{0.5}
 \begin{paracol}{2}
     % LEFT COLUMN: The Improved Image
     \centering
@@ -152,6 +151,7 @@
 % --- TASK 3 ---
 \tasktitle{3: Particularly Good Visualization Critique}
 
+\columnratio{0.5}
 \begin{paracol}{2}
     % LEFT COLUMN: The Sankey Diagram
     \centering
@@ -170,9 +170,6 @@
 
     The visualization is further improved by contextual text snippets, like the fact that half of all plastic was made in just the last twenty years, which adds a sense of urgency to the narrative. Finally, by including both percentages and raw numbers like 8.3 billion tonnes, the chart provides a complete picture that respects both the relative shares and the massive physical scale of global plastic pollution.
     
-    \vspace{1em}
-    \textbf{Source:} David McCandless, \textit{Information is Beautiful} (2017 data).\\
-    \url{https://informationisbeautiful.net/visualizations/plastic-crisis-pollution-recycling-microplastics-bioplastics}
 \end{paracol}
 
 
@@ -255,6 +252,7 @@
 \tasktitle{11: Interactive Visualization}
 
 % This task has 2 images. Paracol allows them to stack naturally in the left column.
+\columnratio{0.5}
 \begin{paracol}{2}
     % LEFT COLUMN: IMAGES
     \centering
@@ -280,88 +278,123 @@
 
 
 % --- TASK 12 ---
-\tasktitle{12: Visualization Creation Process Documentation}
+\tasktitle{12: Visualization Creation Process Documentation (Task 10: Data Map)}
 
+\columnratio{0.5}
 \begin{paracol}{2}
     % LEFT COLUMN: Sketches and Versions
     \centering
-    \textit{[Insert images of sketches/versions here]}
-    \captionof{figure}{Evolution of the visualization design}
+    \includegraphics[width=\linewidth]{../out/12_idea_1.jpeg}
+    \captionof{figure}{Initial sketch focusing on the geographical layout of Europe.}
+    
+    \switchcolumn 
+    \includegraphics[width=\linewidth]{../out/12_idea_2.jpeg}
+    \captionof{figure}{Adding color scales and specific numeric labels for better clarity.}
+    
+\end{paracol}
+\newpage
+
+\columnratio{0.5}
+\begin{paracol}{2}
+    % LEFT COLUMN: Sketches and Versions
+    \centering
+    \includegraphics[width=\linewidth]{../out/12_idea_3.jpeg}
+    \captionof{figure}{Finalizing the design with a legend to handle missing data.}
     
     \switchcolumn 
     \raggedright
+
+    \textbf{From Sketch to Final Map}
+
+    My process for this map started with a simple goal: 
+    I wanted to show how unemployment rates vary across Europe at a glance.
+     In my first sketch, I focused just on the geography, but I quickly realized that colors alone 
+     wouldn't be precise enough for a viewer to understand the exact differences between neighbors. 
+     To fix this, I decided to add a color bar for general context and then placed the actual percentage 
+     numbers inside each country so the data would be impossible to miss.
+
+    The biggest hurdle appeared when I actually started implementing the code. 
+    I found that several countries were missing data in my dataset, which left awkward blank spots on the map. 
+    I didn't want viewers to think these countries had 0\% unemployment, 
+    so I decided to use a diagonal hatching pattern to represent the missing info. 
+    Adding this "No Data" category to the legend was the final step that made the map feel honest and complete.
     
-    % RIGHT COLUMN: Process Description
-    \textbf{Visualization Selected:} [Specify which visualization]
-    
-    \textbf{Process:}
-    \begin{enumerate}
-        \item \textbf{Initial Idea:} [Describe the concept]
-        \item \textbf{Hand Sketch:} [Describe or include sketch]
-        \item \textbf{Version 1:} [Describe first iteration]
-        \item \textbf{Version 2:} [Describe refinement]
-        \item \textbf{Final Version:} [Describe final decisions]
-    \end{enumerate}
-    
-    [Include 100-150 words explaining the iterative process, design decisions, and improvements made at each stage.]
 \end{paracol}
 
 
 % --- TASK 13 ---
 \tasktitle{13: Additional Visualizations (Optional)}
 
-\begin{paracol}{2}
+
+
+\begin{paracol}{1}
     % LEFT COLUMN
     \centering
-    \textit{[Insert optional visualization here]}
-    \captionof{figure}{Additional visualization}
+    \includegraphics[width=0.80\linewidth,height=0.80\textheight,keepaspectratio]{../out/13_word_cloud_tags.pdf}
+    \captionof{figure}{Word cloud of tags from MovieLens data}
     
-    \switchcolumn 
-    \raggedright
+\end{paracol}
+
+\begin{paracol}{1}
+    % LEFT COLUMN
+    \centering
+    \includegraphics[width=0.80\linewidth,height=0.80\textheight,keepaspectratio]{../out/13_movie_count_genre.pdf}
+    \captionof{figure}{Bar plot of movie count by genre}
     
-    % RIGHT COLUMN
-    [Note: Include any additional visualizations you created beyond the required tasks. This section is optional but can demonstrate breadth and creativity in your portfolio.]
+\end{paracol}
+
+
+\begin{paracol}{1}
+    % LEFT COLUMN
+    \centering
+    \includegraphics[width=0.80\linewidth,height=0.80\textheight,keepaspectratio]{../out/13_3d_clusters.pdf}
+    \captionof{figure}{3D plot of K-means clusters of MovieLens data}
+    
 \end{paracol}
 
 
 % --- TASK 14 ---
-% For text-heavy lists, we switch to standard multicols to preserve flow
 \tasktitle{14: Favorite Tools for Data Visualization}
 
 \begin{multicols}{2}
-\subsection*{Python Packages}
-\begin{itemize}
-    \item \textbf{Matplotlib:} Comprehensive plotting library with extensive customization options. Essential for creating publication-quality static visualizations.
-    \item \textbf{Seaborn:} Statistical data visualization built on matplotlib, providing high-level interface for attractive statistical graphics.
-    \item \textbf{Plotly:} Interactive visualization library enabling creation of web-based interactive charts and dashboards.
-    \item \textbf{Geopandas:} Extends pandas for geospatial data, essential for creating maps and spatial visualizations.
-    \item \textbf{Pandas:} Data manipulation and analysis, foundational for all data visualization work.
-\end{itemize}
 
-\subsection*{Web Services and Tools}
-\begin{itemize}
-    \item \textbf{Streamlit:} Rapid deployment platform for interactive data applications, enabling quick creation of web-based visualizations without extensive web development knowledge.
-    \item \textbf{Natural Earth:} High-quality vector and raster map data at various scales, essential for creating professional map visualizations.
-\end{itemize}
+\subsection*{Technical Workflow with Python}
 
-\subsection*{Data Sources}
-\begin{itemize}
-    \item \textbf{World Bank Data:} Comprehensive economic and social indicators for countries worldwide.
-    \item \textbf{NASA GISTEMP:} Global temperature anomaly data for climate change analysis.
-    \item \textbf{Compustat:} Financial data for companies, useful for financial analytics visualizations.
-\end{itemize}
+For the technical side of my data projects, 
+I rely on a specific set of Python tools to turn raw numbers into a finished story. 
+My process always begins with \textbf{Pandas}, which I use for data manipulation and cleaning. 
+I find that it makes handling complex math much more readable and faster than writing standard Python code, 
+especially when organizing data for the first time. 
 
-\subsection*{Design Principles and Inspiration}
-\begin{itemize}
-    \item \textbf{Tufte's Principles:} Data-ink ratio, chartjunk elimination, and information design principles guide effective visualization design.
-    \item \textbf{Color Theory:} Understanding color perception and accessibility (colorblind-friendly palettes) is crucial for effective visual encoding.
-    \item \textbf{Statistical Graphics:} Reference works on statistical graphics provide guidance on appropriate chart type selection and encoding choices.
-\end{itemize}
+Once the data is ready, I switch to \textbf{Seaborn} to create the actual graphics. 
+I love it because it offers a high-level interface that produces attractive statistical charts 
+without needing a lot of manual styling; it handles professional color palettes and design styles automatically. 
+
+Choosing the right colors is a big part of my design process. I often use \textbf{Set3} for its muted tones, 
+which allow me to fill in large blocks of color without the map or chart feeling overwhelming to the viewer. 
+When I need something more eye-catching and easier to read at a glance, I switch to the more vibrant \textbf{Set1}. 
+In specific cases like bar charts, where I need a wide variety of distinct colors to tell categories apart, 
+I prefer \textbf{gist\_ncar} because it provides a very vibrant and clear range. 
+Finally, for visualizations that show a scale—like moving from "Positive" to "Negative" values I 
+always reach for the \textbf{coolwarm} colormap. 
+This sequential palette smoothly transitions from blue (cool) for low or negative values to red (warm) 
+for high or positive values, making it intuitive for anyone to spot the data's extremes immediately.
+
+
+
+\subsection*{Favorite Data Sources}
+
+Finding high-quality data is the foundation of every visualization. I really like using \textbf{World Bank Data} 
+because they provide comprehensive global indicators that are easy to access in several formats, like CSV or Excel. 
+For more specialized projects, I enjoy working with \textbf{MovieLens} datasets. 
+They offer small versions that are perfect for testing data visualization ideas and machine learning projects, 
+but they also provide much larger sets that allow me to verify the scalability and assumptions of my findings. 
 
 \subsection*{AI Tools}
-\begin{itemize}
-    \item Generative AI tools were used for code generation and visualization creation assistance, as permitted by the assignment guidelines.
-\end{itemize}
+Throughout this entire process, I have integrated AI tools like \textbf{Gemini}. 
+It has become a great tool for helping me brainstorm different visualization ideas or quickly generating the initial code I need for a chart. 
+It also helps me greatly with debugging and improving the code.
+
 \end{multicols}
 
 \newpage
@@ -374,36 +407,17 @@
 \begin{itemize}
     \item \textbf{European Unemployment Data:} World Bank Data Catalog. \url{https://data.worldbank.org/indicator/SL.UEM.TOTL.ZS} 
     \item \textbf{Map Data:} Natural Earth. \url{https://www.naturalearthdata.com/}
-    \item \textbf{Climate Data:} NASA GISTEMP. \url{https://data.giss.nasa.gov/gistemp/} 
-    \item \textbf{Financial Data:} Compustat database
-    \item \textbf{CRSP Data:} Center for Research in Security Prices
+    \item \textbf{MovieLens Data:} MovieLens 100K dataset. \url{https://grouplens.org/datasets/movielens/100k/}
+    \item \textbf{Financial Data:} Compustat database. \url{https://wrds-www.wharton.upenn.edu/pages/documents/wrds-data-library/compustat-data/}
+    \item \textbf{CRSP Data:} Center for Research in Security Prices. \url{https://wrds-www.wharton.upenn.edu/pages/about/data-vendors/center-for-research-in-security-prices-crsp/}
 \end{itemize}
 
 \section*{Visualization Sources}
 \begin{itemize}
     \item \textbf{Bad Visualization Example:} OpenAI GPT-5 Reveal Livestream. \url{https://www.youtube.com/live/0Uu_VJeVVfo?si=kcrR9N24rP5IrYFj}
-    \item \textbf{Good Visualization Example:} [Please provide source]
+    \item \textbf{Good Visualization Example:} David McCandless, \textit{Information is Beautiful} (2017 data). \url{https://informationisbeautiful.net/visualizations/plastic-crisis-pollution-recycling-microplastics-bioplastics}
 \end{itemize}
 
-\section*{Software and Tools Used}
-\subsection*{Python Packages}
-\begin{itemize}
-    \item pandas $\geq$ 2.3.3
-    \item numpy $\geq$ 2.3.4
-    \item matplotlib $\geq$ 3.8.0
-    \item seaborn $\geq$ 0.13.2
-    \item plotly $\geq$ 5.0.0
-    \item geopandas $\geq$ 0.14.0
-    \item streamlit $\geq$ 1.28.0
-    \item openpyxl $\geq$ 3.1.0 
-    \item xarray (for netCDF data)
-    \item cartopy (for map projections)
-\end{itemize}
-
-\subsection*{Web Services}
-\begin{itemize}
-    \item Streamlit Cloud (for interactive visualization deployment)
-\end{itemize}
 
 \subsection*{Additional Software}
 \begin{itemize}
@@ -414,12 +428,10 @@
 \section*{Generative AI Disclosure}
 Generative AI tools were used in the following ways:
 \begin{itemize}
-    \item Code generation and debugging assistance for visualization creation
-    \item LaTeX document structure and formatting assistance
-    \item Visualization design suggestions and best practices consultation
+    \item Code generation for graphical visualizations for the tasks 2, 4, 5, 6, 7, 8, 9, 10, 11, 12.
+    \item LaTeX document structure
 \end{itemize}
 
-\textbf{Note:} Generative AI was not used for writing the critique texts (Tasks 1 and 3) or the process documentation (Task 12), as per assignment guidelines.
 \end{multicols}
 
 \end{document}
