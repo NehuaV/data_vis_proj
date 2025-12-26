@@ -251,29 +251,31 @@
 % --- TASK 11 ---
 \tasktitle{11: Interactive Visualization}
 
-% This task has 2 images. Paracol allows them to stack naturally in the left column.
-\columnratio{0.5}
-\begin{paracol}{2}
-    % LEFT COLUMN: IMAGES
+% First image on its own page
+\begin{paracol}{1}
     \centering
-    \includegraphics[width=\linewidth]{../out/11_interactive_unemployment_1.png}
-    \vspace{0.5cm} % Space between images
-    \includegraphics[width=\linewidth]{../out/11_interactive_unemployment_2.png}
-    \captionof{figure}{Screenshots of the interactive European unemployment visualization}
-    
-    \switchcolumn % SWITCH TO RIGHT COLUMN
-    \raggedright
-    
-    % RIGHT COLUMN: TEXT
-    This interactive visualization allows users to explore European unemployment data dynamically.
-    
-    Users can select different years using a slider, view up-to-date statistics, and see how unemployment rates vary across European countries.
-    
-    The visualization is deployed as a Streamlit application accessible via web browser.
-    
-    \textbf{Public URL:} \url{https://data-viz-app.streamlit.app/}
+    \includegraphics[width=0.95\linewidth,height=0.80\textheight,keepaspectratio]{../out/11_interactive_unemployment_1.png}
+    \captionof{figure}{Screenshot of interactive European unemployment visualization for year 2024 (view 1)}
+\end{paracol}
 
+\clearpage
+
+% Second image with description below
+\begin{paracol}{1}
+    \centering
+    \includegraphics[width=0.95\linewidth,height=0.80\textheight,keepaspectratio]{../out/11_interactive_unemployment_2.png}
+    \captionof{figure}{Screenshot of interactive European unemployment visualization for year 1996 (view 2)}
     
+    % Description below both images
+    \vspace{1.5em}
+    \raggedright
+    This interactive visualization allows users to explore European unemployment data dynamically.
+
+    Users can select different years using a slider, view up-to-date statistics, and see how unemployment rates vary across European countries.
+
+    The visualization is deployed as a Streamlit application accessible via web browser.
+
+    \textbf{Public URL:} \url{https://data-viz-app.streamlit.app/}
 \end{paracol}
 
 
