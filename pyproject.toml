@@ -16,6 +16,10 @@ dependencies = [
     "matplotlib>=3.8.0",
     "openpyxl>=3.1.0",
     "ipykernel>=7.1.0",
+    "wrds>=3.1.6",
+    "circlify>=0.15.1",
+    "wbgapi>=1.0.12",
+    "squarify>=0.4.4",
 ]
 
 [dependency-groups]
