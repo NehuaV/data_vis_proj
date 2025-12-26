@@ -1,0 +1,438 @@
+\documentclass[a4paper,landscape,11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{lmodern}
+
+% --- NEW PACKAGES FOR FLEXIBLE LAYOUT ---
+\usepackage{paracol}    % Allows parallel columns that break across pages
+\usepackage{caption}    % Allows captions outside of float environments
+\usepackage{multicol}   % For text-only sections (Tasks 14/15)
+
+% Page geometry for landscape A4
+\geometry{
+    a4paper,
+    landscape,
+    left=20mm,
+    right=20mm,
+    top=20mm,
+    bottom=20mm,
+    marginparwidth=0mm
+}
+
+% Hyperref setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=blue,
+    citecolor=black
+}
+
+% Header and footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{\small Data Visualization Portfolio 2025}
+\fancyfoot[C]{\small Page \thepage\ of \pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% Title formatting
+\titleformat{\section}
+{\Large\bfseries}
+{}
+{0em}
+{}[\titlerule]
+
+\titleformat{\subsection}
+{\large\bfseries}
+{}
+{0em}
+{}
+
+% Spacing
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\onehalfspacing
+
+% --- LAYOUT CONFIGURATION ---
+% Set the column ratio for paracol (0.5 means 50/50 split)
+\columnratio{0.5} 
+\setlength{\columnsep}{2em}
+
+% Custom commands
+\newcommand{\tasktitle}[1]{\clearpage\subsection*{Task #1}}
+
+\begin{document}
+
+% --- TITLE PAGE ---
+\begin{titlepage}
+\centering
+\vspace*{2cm}
+
+{\Huge\bfseries Data Visualization Portfolio}\\[1cm]
+{\Large Financial Data Analytics}\\[0.5cm]
+{\large Dobri Trifonov}\\[0.5cm]
+{\large 2025}\\[2cm]
+
+\vfill
+
+{\large \today}
+
+\end{titlepage}
+
+% \newpage
+% \tableofcontents
+% \newpage
+
+% --- TASK 1 ---
+\tasktitle{1: Bad and/or Manipulative Visualization Critique}
+
+\begin{paracol}{2}
+    % LEFT COLUMN: Image
+    \centering
+    \includegraphics[width=\linewidth]{../out/1_bad_graph.png}
+    \captionof{figure}{Example of a misleading graph from the GPT-5 launch.}
+    
+    \switchcolumn % Switch to Right Column
+    \raggedright
+    
+    % RIGHT COLUMN: Text
+    \textbf{Analysis of Graphical Manipulation}
+    
+    I analyzed this chart from the OpenAI livestream and found several major issues that make the data hard to trust. The most obvious problem is that the bar heights do not match the numbers provided. For example, the bar for OpenAI o3 claims to be 69.1\%, yet it is visually almost identical in height to the GPT-4o bar, which is only 30.8\%. Since one value is more than double the other, the bars should reflect that difference; instead, this distortion makes the models look more similar than they are to exaggerate the leap made by the new GPT-5 model.
+
+    Furthermore, the legend introduces a confusing inconsistency by only showing the breakdown for ``With thinking'' and ``Without thinking'' modes on the newest model. Because the older models are shown as solid bars, a normal viewer cannot make a fair comparison because it is unclear which mode they are in. This confusion is made worse by the strange ordering of the models. By putting the newest model first rather than following a logical chronological timeline from oldest to newest, the graph feels like it is designed to grab attention rather than provide a clear, honest record of AI improvement.
+    
+    \vspace{1em}
+    \textbf{Source:} OpenAI GPT-5 Reveal Livestream (\url{https://www.youtube.com/live/0Uu_VJeVVfo}).
+    
+
+\end{paracol}
+
+% --- TASK 2 ---
+\tasktitle{2: Improved Version of Bad Visualization}
+
+\begin{paracol}{2}
+    % LEFT COLUMN: The Improved Image
+    \centering
+    \includegraphics[width=\linewidth]{../out/2_swe_bench_verified_performance.pdf}
+    \captionof{figure}{Improved visualization with corrected scaling and chronological order.}
+    
+    \switchcolumn 
+    \raggedright
+    
+    % RIGHT COLUMN: Explanation of the Fixes
+    \textbf{Implementing the Improvements}
+
+    This version directly addresses the flaws I identified in the original 
+    graph to ensure the data is presented honestly and is easy for anyone to follow. 
+    I first corrected the scale distortion by ensuring every bar height accurately 
+    represents its percentage. By adjusting the y-axis, the massive performance 
+    gap between models is now visually clear, showing that the older OpenAI o3 model is 
+    actually more than twice as fast compared to the newer GPT-4o model, and that the performance,
+    gap is actually caused by the thinking mode. This also highlights that the new GPT-5's 
+    biggest performance gains are in the non-thinking mode, which is a surprising result.
+
+    Finally, I rearranged the models into a logical chronological order, 
+    starting with the oldest version on the left. This follows the natural way 
+    people read progress over time and creates a much more intuitive story about 
+    how the technology has evolved.
+
+\end{paracol}
+
+
+% --- TASK 3 ---
+\tasktitle{3: Particularly Good Visualization Critique}
+
+\begin{paracol}{2}
+    % LEFT COLUMN: The Sankey Diagram
+    \centering
+    \includegraphics[width=\linewidth]{../out/3_plastic_sankey.png} 
+    \captionof{figure}{Sankey diagram by David McCandless showing the flow of plastic waste.}
+    
+    \switchcolumn 
+    \raggedright
+    
+    % RIGHT COLUMN: Narrative Critique
+    \textbf{Why This Visualization Works}
+    
+    This Sankey diagram about plastic waste is an excellent example of how to tell a complex story through data. It successfully shows the entire lifecycle of plastic products by using paths where the width is proportional to the actual amount of material. This makes it easy for any reader to understand the scale of the problem at a glance, as the massive orange flow for ``Discarded'' creates an immediate visual impact that a simple table of numbers could never achieve.
+    
+    The chart is particularly effective because it highlights a surprising truth: while 6\% of plastic is labeled as ``Recycled,'' only a tiny 1\% actually makes it ``Back in Use.'' By visually separating these categories, the designer clears up the common misconception that all recycling leads to new products. 
+
+    The visualization is further improved by contextual text snippets, like the fact that half of all plastic was made in just the last twenty years, which adds a sense of urgency to the narrative. Finally, by including both percentages and raw numbers like 8.3 billion tonnes, the chart provides a complete picture that respects both the relative shares and the massive physical scale of global plastic pollution.
+    
+    \vspace{1em}
+    \textbf{Source:} David McCandless, \textit{Information is Beautiful} (2017 data).\\
+    \url{https://informationisbeautiful.net/visualizations/plastic-crisis-pollution-recycling-microplastics-bioplastics}
+\end{paracol}
+
+
+% --- TASK 4 ---
+\tasktitle{4: Climate Change Visualization}
+
+\begin{paracol}{1}
+    \centering
+    \includegraphics[width=0.80\linewidth,height=0.80\textheight,keepaspectratio]{../out/4_climate_change_visualization.pdf}
+    \captionof{figure}{Visualization of climate change data}
+\end{paracol}
+
+
+% --- TASK 5 ---
+\tasktitle{5: Black-and-White Visualization (No Grey Levels)}
+
+\begin{paracol}{1}
+    \centering
+    \includegraphics[width=0.80\linewidth,height=0.80\textheight,keepaspectratio]{../out/5_apple_revenue_black_and_white.pdf}
+    \captionof{figure}{Black-and-white visualization of Apple's yearly revenue}
+\end{paracol}
+
+
+% --- TASK 6 ---
+\tasktitle{6: Visualization Using Color as Important Aesthetics}
+
+\begin{paracol}{1}
+    \centering
+    \includegraphics[width=0.80\linewidth,height=0.80\textheight,keepaspectratio]{../out/6_ibm_correlation_heatmap.pdf}
+    \captionof{figure}{IBM correlation heatmap of Compustat data}
+\end{paracol}
+
+
+
+% --- TASK 7 ---
+\tasktitle{7: Visualization Maximizing Tufte's Data-Ink Ratio}
+
+\begin{paracol}{1}
+    \centering
+    \includegraphics[width=0.80\linewidth,height=0.80\textheight,keepaspectratio]{../out/7_dataink.pdf}
+    \captionof{figure}{Monthly closing prices of IBM stock}
+    
+\end{paracol}
+
+
+% --- TASK 8 ---
+\tasktitle{8: Non-Standard Visualization Type}
+
+\begin{paracol}{2}
+    % LEFT COLUMN
+    \centering
+    \includegraphics[width=0.80\linewidth,height=0.80\textheight,keepaspectratio]{../out/8_world_oil_reserve_production.png}
+    \captionof{figure}{Voronoi Treemap showing global oil production by country}
+    
+    \switchcolumn 
+    \raggedright
+    
+    % RIGHT COLUMN
+    Voronoi Treemap
+\end{paracol}
+
+
+% --- TASK 9 ---
+\tasktitle{9: Visualization About Yourself}
+
+\begin{paracol}{1}  
+    \centering
+    \includegraphics[width=0.80\linewidth,height=0.80\textheight,keepaspectratio]{../out/9_entertainment_ratings.pdf}
+    \captionof{figure}{My ratings of entertainment media out of 10}
+\end{paracol}
+    
+
+
+% --- TASK 10 ---
+\tasktitle{10: Data Map}
+
+\begin{paracol}{1}
+    \centering
+    \includegraphics[width=0.80\linewidth,height=0.80\textheight,keepaspectratio]{../out/10_europe_unemployment_map.pdf}
+    \captionof{figure}{Map visualization of European unemployment rates}
+\end{paracol}
+    
+
+% --- TASK 11 ---
+\tasktitle{11: Interactive Visualization}
+
+% This task has 2 images. Paracol allows them to stack naturally in the left column.
+\begin{paracol}{2}
+    % LEFT COLUMN: IMAGES
+    \centering
+    \includegraphics[width=\linewidth]{../out/11_interactive_unemployment_1.png}
+    \vspace{0.5cm} % Space between images
+    \includegraphics[width=\linewidth]{../out/11_interactive_unemployment_2.png}
+    \captionof{figure}{Screenshots of the interactive European unemployment visualization}
+    
+    \switchcolumn % SWITCH TO RIGHT COLUMN
+    \raggedright
+    
+    % RIGHT COLUMN: TEXT
+    This interactive visualization allows users to explore European unemployment data dynamically.
+    
+    Users can select different years using a slider, view real-time statistics, and see how unemployment rates vary across European countries.
+    
+    The visualization is deployed as a Streamlit application accessible via web browser.
+    
+    \textbf{Public URL:} [Insert your deployed Streamlit app URL here] 
+
+    The interactive features include:
+    \begin{itemize}
+        \item Year selection slider to explore temporal trends
+        \item Real-time statistics calculation for selected year
+        \item Color-coded map showing unemployment rates
+        \item Highlighting of countries with highest unemployment rates
+    \end{itemize}
+    
+    
+\end{paracol}
+
+
+% --- TASK 12 ---
+\tasktitle{12: Visualization Creation Process Documentation}
+
+\begin{paracol}{2}
+    % LEFT COLUMN: Sketches and Versions
+    \centering
+    \textit{[Insert images of sketches/versions here]}
+    \captionof{figure}{Evolution of the visualization design}
+    
+    \switchcolumn 
+    \raggedright
+    
+    % RIGHT COLUMN: Process Description
+    \textbf{Visualization Selected:} [Specify which visualization]
+    
+    \textbf{Process:}
+    \begin{enumerate}
+        \item \textbf{Initial Idea:} [Describe the concept]
+        \item \textbf{Hand Sketch:} [Describe or include sketch]
+        \item \textbf{Version 1:} [Describe first iteration]
+        \item \textbf{Version 2:} [Describe refinement]
+        \item \textbf{Final Version:} [Describe final decisions]
+    \end{enumerate}
+    
+    [Include 100-150 words explaining the iterative process, design decisions, and improvements made at each stage.]
+\end{paracol}
+
+
+% --- TASK 13 ---
+\tasktitle{13: Additional Visualizations (Optional)}
+
+\begin{paracol}{2}
+    % LEFT COLUMN
+    \centering
+    \textit{[Insert optional visualization here]}
+    \captionof{figure}{Additional visualization}
+    
+    \switchcolumn 
+    \raggedright
+    
+    % RIGHT COLUMN
+    [Note: Include any additional visualizations you created beyond the required tasks. This section is optional but can demonstrate breadth and creativity in your portfolio.]
+\end{paracol}
+
+
+% --- TASK 14 ---
+% For text-heavy lists, we switch to standard multicols to preserve flow
+\tasktitle{14: Favorite Tools for Data Visualization}
+
+\begin{multicols}{2}
+\subsection*{Python Packages}
+\begin{itemize}
+    \item \textbf{Matplotlib:} Comprehensive plotting library with extensive customization options. Essential for creating publication-quality static visualizations.
+    \item \textbf{Seaborn:} Statistical data visualization built on matplotlib, providing high-level interface for attractive statistical graphics.
+    \item \textbf{Plotly:} Interactive visualization library enabling creation of web-based interactive charts and dashboards.
+    \item \textbf{Geopandas:} Extends pandas for geospatial data, essential for creating maps and spatial visualizations.
+    \item \textbf{Pandas:} Data manipulation and analysis, foundational for all data visualization work.
+\end{itemize}
+
+\subsection*{Web Services and Tools}
+\begin{itemize}
+    \item \textbf{Streamlit:} Rapid deployment platform for interactive data applications, enabling quick creation of web-based visualizations without extensive web development knowledge.
+    \item \textbf{Natural Earth:} High-quality vector and raster map data at various scales, essential for creating professional map visualizations.
+\end{itemize}
+
+\subsection*{Data Sources}
+\begin{itemize}
+    \item \textbf{World Bank Data:} Comprehensive economic and social indicators for countries worldwide.
+    \item \textbf{NASA GISTEMP:} Global temperature anomaly data for climate change analysis.
+    \item \textbf{Compustat:} Financial data for companies, useful for financial analytics visualizations.
+\end{itemize}
+
+\subsection*{Design Principles and Inspiration}
+\begin{itemize}
+    \item \textbf{Tufte's Principles:} Data-ink ratio, chartjunk elimination, and information design principles guide effective visualization design.
+    \item \textbf{Color Theory:} Understanding color perception and accessibility (colorblind-friendly palettes) is crucial for effective visual encoding.
+    \item \textbf{Statistical Graphics:} Reference works on statistical graphics provide guidance on appropriate chart type selection and encoding choices.
+\end{itemize}
+
+\subsection*{AI Tools}
+\begin{itemize}
+    \item Generative AI tools were used for code generation and visualization creation assistance, as permitted by the assignment guidelines.
+\end{itemize}
+\end{multicols}
+
+\newpage
+
+% --- TASK 15 ---
+\tasktitle{15: References}
+
+\begin{multicols}{2}
+\section*{Data Sources}
+\begin{itemize}
+    \item \textbf{European Unemployment Data:} World Bank Data Catalog. \url{https://data.worldbank.org/indicator/SL.UEM.TOTL.ZS} 
+    \item \textbf{Map Data:} Natural Earth. \url{https://www.naturalearthdata.com/}
+    \item \textbf{Climate Data:} NASA GISTEMP. \url{https://data.giss.nasa.gov/gistemp/} 
+    \item \textbf{Financial Data:} Compustat database
+    \item \textbf{CRSP Data:} Center for Research in Security Prices
+\end{itemize}
+
+\section*{Visualization Sources}
+\begin{itemize}
+    \item \textbf{Bad Visualization Example:} OpenAI GPT-5 Reveal Livestream. \url{https://www.youtube.com/live/0Uu_VJeVVfo?si=kcrR9N24rP5IrYFj}
+    \item \textbf{Good Visualization Example:} [Please provide source]
+\end{itemize}
+
+\section*{Software and Tools Used}
+\subsection*{Python Packages}
+\begin{itemize}
+    \item pandas $\geq$ 2.3.3
+    \item numpy $\geq$ 2.3.4
+    \item matplotlib $\geq$ 3.8.0
+    \item seaborn $\geq$ 0.13.2
+    \item plotly $\geq$ 5.0.0
+    \item geopandas $\geq$ 0.14.0
+    \item streamlit $\geq$ 1.28.0
+    \item openpyxl $\geq$ 3.1.0 
+    \item xarray (for netCDF data)
+    \item cartopy (for map projections)
+\end{itemize}
+
+\subsection*{Web Services}
+\begin{itemize}
+    \item Streamlit Cloud (for interactive visualization deployment)
+\end{itemize}
+
+\subsection*{Additional Software}
+\begin{itemize}
+    \item LaTeX (for report compilation)
+    \item Jupyter Notebook (for data analysis and visualization development)
+\end{itemize}
+
+\section*{Generative AI Disclosure}
+Generative AI tools were used in the following ways:
+\begin{itemize}
+    \item Code generation and debugging assistance for visualization creation
+    \item LaTeX document structure and formatting assistance
+    \item Visualization design suggestions and best practices consultation
+\end{itemize}
+
+\textbf{Note:} Generative AI was not used for writing the critique texts (Tasks 1 and 3) or the process documentation (Task 12), as per assignment guidelines.
+\end{multicols}
+
+\end{document}
