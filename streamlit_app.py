@@ -283,8 +283,7 @@ with col_right:
             max_deviation=max_deviation,
         )
 
-        # Display using st.image for stable rendering (no layout shift)
-        st.image(map_image, use_container_width=True)
+        st.image(map_image, width="stretch")
 
 st.markdown("---")
 st.markdown(
