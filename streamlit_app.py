@@ -255,7 +255,7 @@ with col_right:
     cbar = fig.colorbar(sm, cax=cax, orientation="horizontal")
     cbar.set_label("Unemployment Rate (%)")
 
-    st.pyplot(fig, use_container_width=True)
+    st.pyplot(fig, width="stretch")
 
 st.markdown("---")
 st.markdown(

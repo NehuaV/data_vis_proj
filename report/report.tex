@@ -188,7 +188,7 @@
 
 \begin{paracol}{1}
     \centering
-    \includegraphics[width=0.80\linewidth,height=0.80\textheight,keepaspectratio]{../out/5_apple_revenue_black_and_white.pdf}
+    \includegraphics[width=\linewidth,height=\textheight,keepaspectratio]{../out/5_apple_revenue_black_and_white.pdf}
     \captionof{figure}{Black-and-white visualization of Apple's yearly revenue}
 \end{paracol}
 
@@ -243,8 +243,8 @@
 
 \begin{paracol}{1}
     \centering
-    \includegraphics[width=0.80\linewidth,height=0.80\textheight,keepaspectratio]{../out/10_europe_unemployment_map.pdf}
-    \captionof{figure}{Map visualization of European unemployment rates}
+    \includegraphics[width=0.80\linewidth,height=0.80\textheight,keepaspectratio]{../out/europe_full_cartogram.pdf}
+    \captionof{figure}{Cartogram of population density in Europe (People per km²)}
 \end{paracol}
     
 
@@ -254,7 +254,7 @@
 % First image on its own page
 \begin{paracol}{1}
     \centering
-    \includegraphics[width=0.95\linewidth,height=0.80\textheight,keepaspectratio]{../out/11_interactive_unemployment_1.png}
+    \includegraphics[width=\linewidth,height=\textheight,keepaspectratio]{../out/11_interactive_unemployment_1.png}
     \captionof{figure}{Screenshot of interactive European unemployment visualization for year 2024 (view 1)}
 \end{paracol}
 
@@ -280,7 +280,7 @@
 
 
 % --- TASK 12 ---
-\tasktitle{12: Visualization Creation Process Documentation (Task 10: Data Map)}
+\tasktitle{12: Visualization Creation Process Documentation (Task 11: Interactive Visualization)}
 
 \columnratio{0.5}
 \begin{paracol}{2}
@@ -310,16 +310,20 @@
 
     My process for this map started with a simple goal: 
     I wanted to show how unemployment rates vary across Europe at a glance.
-     In my first sketch, I focused just on the geography, but I quickly realized that colors alone 
-     wouldn't be precise enough for a viewer to understand the exact differences between neighbors. 
-     To fix this, I decided to add a color bar for general context and then placed the actual percentage 
-     numbers inside each country so the data would be impossible to miss.
+    In my first sketch, I focused just on the geography, but I quickly realized that colors alone 
+    wouldn't be precise enough for a viewer to understand the exact differences between neighbors. 
+    To fix this, I decided to add a color bar for general context and then placed the actual percentage 
+    numbers inside each country so the data would be impossible to miss.
 
     The biggest hurdle appeared when I actually started implementing the code. 
     I found that several countries were missing data in my dataset, which left awkward blank spots on the map. 
     I didn't want viewers to think these countries had 0\% unemployment, 
     so I decided to use a diagonal hatching pattern to represent the missing info. 
     Adding this "No Data" category to the legend was the final step that made the map feel honest and complete.
+
+    After all of that, I decided to make the map interactive by adding a slider 
+    that allows you to see how unemployment rates change from year to year. 
+    This lets users explore temporal trends easily, making the visualization much more insightful and engaging.
     
 \end{paracol}
 
@@ -332,7 +336,7 @@
 \begin{paracol}{1}
     % LEFT COLUMN
     \centering
-    \includegraphics[width=0.80\linewidth,height=0.80\textheight,keepaspectratio]{../out/13_word_cloud_tags.pdf}
+    \includegraphics[width=\linewidth,height=\textheight,keepaspectratio]{../out/13_word_cloud_tags.pdf}
     \captionof{figure}{Word cloud of tags from MovieLens data}
     
 \end{paracol}
@@ -340,19 +344,19 @@
 \begin{paracol}{1}
     % LEFT COLUMN
     \centering
-    \includegraphics[width=0.80\linewidth,height=0.80\textheight,keepaspectratio]{../out/13_movie_count_genre.pdf}
+    \includegraphics[width=\linewidth,height=\textheight,keepaspectratio]{../out/13_movie_count_genre.pdf}
     \captionof{figure}{Bar plot of movie count by genre}
     
 \end{paracol}
 
 
-\begin{paracol}{1}
-    % LEFT COLUMN
-    \centering
-    \includegraphics[width=0.80\linewidth,height=0.80\textheight,keepaspectratio]{../out/13_3d_clusters.pdf}
-    \captionof{figure}{3D plot of K-means clusters of MovieLens data}
+% \begin{paracol}{1}
+%     % LEFT COLUMN
+%     \centering
+%     \includegraphics[width=0.80\linewidth,height=0.80\textheight,keepaspectratio]{../out/13_3d_clusters.pdf}
+%     \captionof{figure}{3D plot of K-means clusters of MovieLens data}
     
-\end{paracol}
+% \end{paracol}
 
 
 % --- TASK 14 ---
@@ -425,6 +429,7 @@ It also helps me greatly with debugging and improving the code.
 \begin{itemize}
     \item LaTeX (for report compilation)
     \item Jupyter Notebook (for data analysis and visualization development)
+    \item Libraries: Pandas, Seaborn, Matplotlib, Geopandas, Cartogram, Plotly, Streamlit.
 \end{itemize}
 
 \section*{Generative AI Disclosure}
