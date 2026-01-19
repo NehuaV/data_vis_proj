@@ -115,7 +115,7 @@ def load_data():
     return europe_map, df_melted
 
 
-@st.cache_data
+@st.cache_resource
 def create_map_figure(
     selected_year: int,
     _merged,  # underscore prefix tells Streamlit not to hash this
@@ -272,18 +272,18 @@ with col_left:
 
 with col_right:
     # Create a placeholder container to prevent layout shift
-    map_container = st.container()
+    map_container = st.container(width="stretch", height="stretch")
 
-    with map_container:
-        # Generate cached map image
-        map_image = create_map_figure(
-            selected_year=selected_year,
-            _merged=merged,
-            euro_mean=euro_mean,
-            max_deviation=max_deviation,
-        )
+    with st.spinner("Generating map..."):
+        with map_container:
+            map_image = create_map_figure(
+                selected_year=selected_year,
+                _merged=merged,
+                euro_mean=euro_mean,
+                max_deviation=max_deviation,
+            )
+            st.image(map_image, width="content")
 
-        st.image(map_image, width="stretch")
 
 st.markdown("---")
 st.markdown(
